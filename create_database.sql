@@ -30,6 +30,11 @@ CREATE TABLE endereco (
     CONSTRAINT fk_endereco_colecionador FOREIGN KEY (id_colecionador) REFERENCES colecionador (id)
 );
 
+CREATE TABLE categoria (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(255),
+);
+
 CREATE TABLE colecao (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(255),
@@ -49,11 +54,6 @@ CREATE TABLE itens_colecao (
     imagem TEXT,
     id_colecao INT,
     CONSTRAINT fk_item_colecao_colecao FOREIGN KEY (id_colecao) REFERENCES colecao (id)
-);
-
-CREATE TABLE categoria (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(255),
 );
 
 
