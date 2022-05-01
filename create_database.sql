@@ -2,7 +2,7 @@ CREATE TABLE colecionador (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome_completo VARCHAR(255),
     email VARCHAR(100),
-    senha VARCHAR(255),
+    senha VARCHAR(255)
 );
 
 CREATE TABLE estado (
@@ -26,13 +26,13 @@ CREATE TABLE endereco (
     cep VARCHAR(10),
     id_cidade INT,
     id_colecionador INT,
-    CONSTRAINT fk_endereco_cidade FOREIGN KEY (id_cidade) REFERENCES cidade (id)
+    CONSTRAINT fk_endereco_cidade FOREIGN KEY (id_cidade) REFERENCES cidade (id),
     CONSTRAINT fk_endereco_colecionador FOREIGN KEY (id_colecionador) REFERENCES colecionador (id)
 );
 
 CREATE TABLE categoria (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(255),
+    nome VARCHAR(255)
 );
 
 CREATE TABLE colecao (
