@@ -1,10 +1,3 @@
-CREATE TABLE colecionador (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nome_completo VARCHAR(255),
-    email VARCHAR(100),
-    senha VARCHAR(255)
-);
-
 CREATE TABLE estado (
   id INT PRIMARY KEY AUTO_INCREMENT,
   nome VARCHAR(75),
@@ -25,9 +18,16 @@ CREATE TABLE endereco (
     bairro VARCHAR(50),
     cep VARCHAR(10),
     id_cidade INT,
-    id_colecionador INT,
-    CONSTRAINT fk_endereco_cidade FOREIGN KEY (id_cidade) REFERENCES cidade (id),
-    CONSTRAINT fk_endereco_colecionador FOREIGN KEY (id_colecionador) REFERENCES colecionador (id)
+    CONSTRAINT fk_endereco_cidade FOREIGN KEY (id_cidade) REFERENCES cidade (id)
+);
+
+CREATE TABLE colecionador (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome_completo VARCHAR(255),
+    email VARCHAR(100),
+    senha VARCHAR(255),
+    id_endereco INT,
+    CONSTRAINT fk_colecionador_endereco FOREIGN KEY (id_endereco) REFERENCES endereco (id)
 );
 
 CREATE TABLE categoria (
@@ -58,4 +58,40 @@ CREATE TABLE itens_colecao (
 
 
 /*Procedure caso a data de inicio da coleção for maior que a data atual, atualizar a data de inicio da coleção para hoje*/
+DELIMITER ;;
+
+CREATE PROCEDURE atualizar_data_inicio_colecao()
+BEGIN
+  DECLARE cursor_id INT;
+  DECLARE cursor_data_inicio DATE;
+  DECLARE finalizado INT DEFAULT FALSE;
+  DECLARE cursor_i CURSOR FOR SELECT id, data_inicio FROM colecao;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET finalizado = TRUE;
+  OPEN cursor_i;
+  read_loop: LOOP
+    FETCH cursor_i INTO cursor_id, cursor_data_inicio;
+    IF finalizado THEN
+      LEAVE read_loop;
+    END IF;
+    IF cursor_data_inicio > CURDATE()  THEN
+    	UPDATE colecao SET data_inicio = CURDATE() WHERE id = cursor_id;
+    END IF;
+  END LOOP;
+  CLOSE cursor_i;
+END;
+;;
+
 /*Trigger caso esteja tentando adicionar item a coleção, mas ela esteja marcada como completa, lançar uma mensagem de erro*/
+DELIMITER $
+
+CREATE TRIGGER trigger_bloqueio_insercao_caso_colecao_completa BEFORE INSERT
+ON itens_colecao
+FOR EACH ROW
+BEGIN
+	DECLARE colecao_completa INT;
+    SELECT colecao.completa INTO colecao_completa FROM colecao WHERE colecao.id = NEW.id_colecao;
+	IF colecao_completa THEN
+    	SIGNAL SQLSTATE '45000' SET message_text = 'Coleção já completa, não podem ser inseridos novos itens nela!';
+    END IF;
+END;
+$
